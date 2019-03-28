@@ -36,20 +36,9 @@ classdef Node < handle
             dist = temp_dist;
         end
         
-        function remove_child(obj,num)
-%             G(G(j).parent).children(G(G(j).parent).children) = [];
-            obj.children = obj.children(obj.children~=num);
-        end
-        
-        function add_child(obj,k)
-            obj.children = [obj.children k];
-        end
-        
         function mark_branch(obj,G)
-            obj.state = 1;
-            for k = 1:length(obj.children)
-                G(obj.children(k)).mark_branch(G)
-            end
+            obj.state = 0;
+            for k = 1:
         end
     end
 end

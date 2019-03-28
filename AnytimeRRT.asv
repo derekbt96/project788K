@@ -96,7 +96,7 @@ for k = 2:max_init_interations
 %               Find best parent
                 if (G(rlist(j,1)).cost+rlist(j,2) < current_cost)
                     parent_id = rlist(j,1);
-                    current_cost = G(rlist(j,1)).cost+rlist(j,2);
+                    current_cost = G(rlist(j)).cost+rlist(j,2);
                 end
             end
             
@@ -107,16 +107,17 @@ for k = 2:max_init_interations
             
 %           Rewire neighbors
             
-            for j = 1:size(rlist,1)
+            for j = 1:length(rlist)
 %               Rewire to find best parent
-                if (G(k).cost+rlist(j,2) < G(rlist(j,1)).cost)
-                    G(G(rlist(j,1)).parent).remove_child(rlist(j,1))
-                    G(rlist(j,1)).parent = k;
-                    G(rlist(j,1)).cost = G(k).cost+rlist(j,2);
-                    G(k).add_child(rlist(j,1));
+                if (G(k).cost+temp_dist < G(rlist(j)).cost)
+                    G(G(j).parent).remove_child(j)
+                    G(j).parent = k;
+                    G(j).cost = G(k).cost+temp_dist;
+                    G(k).add_child(j);
                 end
             end
                 
+%             
             break
         else
 %             fprintf("collision detected\n");
@@ -180,18 +181,17 @@ axis equal
 
 
 
-
+%{
 max_init_interations2 = 1000;
-G2 = [];
-for k = 1:max_init_interations2
-    G2 = [G2 Node()];
-end
+G2(1:max_init_interations2) = Node();
 finish_id2 = max_init_interations2;
 
-G2(1).parent = 0;
-G2(1).Index = 1;
-G2(1).X = final_path(2,1);
-G2(1).Y = final_path(2,2);
-G2(1).cost = G(final_path(2,3)).cost;
+G(1).parent = 0;
+G(1).Index = 1;
+G(1).X = final_path(2,1);
+G(1).Y = final_path(2,2);
+G(1).cost = G(final_path(2,3)).cost;
+%}
+
 
 
