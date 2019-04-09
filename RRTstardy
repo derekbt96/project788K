@@ -1,0 +1,53 @@
+%% Initialize
+clc
+clear all
+
+tic
+
+start = [0 0];
+goal = [10 10];
+speed_bound = 1.5;
+
+epsilon = .8;
+goal_rad = epsilon;
+greed = .05; 
+
+mu = epsilon;
+max_init_interations = 1000;
+G = [];
+
+for k = 1:max_init_interations
+    G = [G Node()];
+end
+
+finish_id = max_init_interations;
+
+G(1).parent = 0;
+G(1).Index = 1;
+G(1).X = start(1);
+G(1).Y = start(2);
+G(1).cost = 0;
+
+obstacles = [5 5 2;
+            7 2 1;
+            4 9 1.5];
+
+path_cost = 10000000;
+tic
+
+%% find path to goal
+for k = 2:max_init_interations
+    
+% 		compute points until valid point is found
+    while 1
+
+% 			get random point in bounds
+        greedtest = rand();
+        if (finish_id == 1000 && greedtest > greed)
+            rand_x = goal(1);
+            rand_y = goal(2);
+        else
+            rand_x = rand() * 10.0;
+            rand_y = rand() * 10.0;
+            rand_v = rand() * speed_bound;
+        end

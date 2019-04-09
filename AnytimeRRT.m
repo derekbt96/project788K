@@ -16,9 +16,11 @@ greed = .05;
 mu = epsilon;
 max_init_interations = 1000;
 G = [];
+
 for k = 1:max_init_interations
     G = [G Node()];
 end
+
 finish_id = max_init_interations;
 
 G(1).parent = 0;
@@ -41,7 +43,7 @@ for k = 2:max_init_interations
 
 % 			get random point in bounds
         greedtest = rand();
-        if (finish_id == 1000 && greedtest > greed)
+        if (finish_id == max_init_interations && greedtest > greed)
             rand_x = goal(1);
             rand_y = goal(2);
         else
@@ -72,6 +74,7 @@ for k = 2:max_init_interations
             final_y = G(parent_id).Y + (epsilon / closest_dist) * (rand_y - G(parent_id).Y);
         end
 
+        
 % 			if new node is not colliding with obstacles add it to array and break while loop to continue to next node
         parentloc = [G(parent_id).X G(parent_id).Y];
         final_location = [final_x final_y];
@@ -81,7 +84,7 @@ for k = 2:max_init_interations
             G(k).X = final_x;
             G(k).Y = final_y;
             
-%           get ids of nodes close enough
+%           get IDs of nodes within epsilon distance
             rlist = [];
             for j = 1:k-1
                 temp_dist = hypot(G(j).X - final_x,G(j).Y - final_y);
@@ -89,6 +92,7 @@ for k = 2:max_init_interations
                     rlist = [rlist; j temp_dist];
                 end
             end
+            
             
 %           find best parent, if any
             current_cost = G(parent_id).cost+hypot(G(parent_id).X - final_x,G(parent_id).Y - final_y);
@@ -122,17 +126,13 @@ for k = 2:max_init_interations
 %             fprintf("collision detected\n");
         end
     end
+    
 % 		if node is close enough to goal, mark node id and break loop
     goal_dist = hypot(G(k).X - goal(1),G(k).Y - goal(2));
     if (goal_dist <= goal_rad)
-        if (G(k).cost+goal_dist < path_cost)
-            fprintf("Found last node, id: %d\n",k);
-            finish_id = k;
-            path_cost = G(k).cost+goal_dist;
-%            break
-        else
-            fprintf("Found possible, id: %d\n",k); 
-        end
+        fprintf("Found last node, id: %d\n",k);
+        finish_id = k;
+        break;
     end
 end
 toc
