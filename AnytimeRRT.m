@@ -148,7 +148,7 @@ end
 final_path = [flipud(final_path); goal 0]
 
 
-G(final_path(2,3)).mark_branch(G);
+% G(final_path(2,3)).mark_branch(G);
 
 
 %% Plotting stuff

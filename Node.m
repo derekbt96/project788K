@@ -3,12 +3,17 @@ classdef Node < handle
     properties
         X 
         Y
+        
         dx
         dy
         vel
+        
         ax
         ay
         a
+        
+        px
+        py
         
         Index % id
         

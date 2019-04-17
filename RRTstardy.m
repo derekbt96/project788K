@@ -5,17 +5,18 @@ clear all
 tic
 
 start = [0 0];
-goal = [10 10];
-goal_vel = [1.5 0];
+goal = [9 9];
+goal_vel = [0 -1.5];
 
-accel_bound = 1.0;
-vel_bound = 2;
+accel_bound = .75;
+vel_bound = 3;
 
 epsilon = .8;
-dt = .5;
+dt = .7;
 
-goal_rad = epsilon;
-greed = .01; 
+goal_rad = 1;
+goal_vel_rad = .75;
+greed = .00; 
 
 mu = 3;
 max_init_interations = 1000;
@@ -34,6 +35,8 @@ G(1).Y = start(2);
 G(1).dx = 1;
 G(1).dy = 0;
 G(1).cost = 0;
+G(1).px = 0;
+G(1).py = 0;
 
 obstacles = [5 5 2;
             7 2 1;
@@ -51,16 +54,17 @@ for k = 2:max_init_interations
 
 % 			get random point in bounds
         greedtest = rand();
-        if (finish_id == 1000 && greedtest < greed)
+        if (finish_id == max_init_interations && greedtest < greed)
             rand_x = goal(1);
             rand_y = goal(2);
             rand_vx = goal_vel(1);
             rand_vy = goal_vel(2);
+            fprintf('greed')
         else
             rand_x = rand() * 10.0;
             rand_y = rand() * 10.0;
-            rand_vx = rand() * 2.0;
-            rand_vy = rand() * 2.0;
+            rand_vx = rand() * vel_bound;
+            rand_vy = rand() * vel_bound;
             rand_vx = rand_vx/hypot(rand_vy,rand_vx);
             rand_vy = rand_vy/hypot(rand_vy,rand_vx);
         end
@@ -72,8 +76,8 @@ for k = 2:max_init_interations
             temp_ax = (rand_x - G(j).X - G(j).dx*dt)*2/(dt^2);
             temp_ay = (rand_y - G(j).Y - G(j).dy*dt)*2/(dt^2);
             temp_accel = hypot(temp_ax,temp_ay);
-            temp_vel = hypot(rand_vx-(G(j).dx+dt*temp_ax),rand_vy-(G(j).dy+dt*temp_ay));
-            temp_cost = .5*temp_accel+.5*temp_vel;
+            temp_vel = hypot(rand_vx-(G(j).dx),rand_vy-(G(j).dy));
+            temp_cost = .5*temp_accel+1.5*temp_vel;
             if (temp_cost < cost)
                 parent_id = j;
                 min_accel = [temp_ax,temp_ay,temp_accel];
@@ -138,14 +142,14 @@ for k = 2:max_init_interations
     end 
     goal_dist = hypot(G(k).X - goal(1),G(k).Y - goal(2));
     vel_dist = hypot(G(k).dx - goal_vel(1),G(k).dy - goal_vel(2));
-    if (goal_dist <= goal_rad && vel_dist < .8)
+    if (goal_dist <= goal_rad && vel_dist < goal_vel_rad)
         fprintf("Found last, id: %d\n",k); 
         finish_id = k;
         break;
     end
 end
 toc
-% Plotting stuff
+%% Plotting stuff
 
 hold on
 plot_cost = 1;
@@ -156,12 +160,12 @@ if plot_cost == 0
 else
     max_cost = 0;
     for k = 2:max_init_interations
-        if max_cost < G(k).a
-            max_cost = G(k).a;
+        if max_cost < G(k).vel
+            max_cost = G(k).vel;
         end
     end
     for k = 2:max_init_interations
-        plot([G(k).X G(G(k).parent).X],[G(k).Y G(G(k).parent).Y],'Color',[G(k).a/max_cost 1-G(k).a/max_cost 0])
+        plot([G(k).X G(G(k).parent).X],[G(k).Y G(G(k).parent).Y],'Color',[G(k).vel/max_cost 1-G(k).vel/max_cost 0])
     end
 end
 t = -.1:.1:2*pi;
@@ -170,8 +174,35 @@ for i = 1:size(obstacles,1)
     y = obstacles(i,2)+obstacles(i,3)*sin(t);
     plot(x,y,'r')
 end
+
+if finish_id ~= max_init_interations
+    final_path = [G(finish_id).X G(finish_id).Y finish_id];
+    id_temp = finish_id;
+else
+    id_temp = 1;
+    temp = hypot(G(1).X-goal(1),G(1).Y-goal(2))+hypot(G(1).dx-goal_vel(1),G(1).dy-goal_vel(2));
+    for k = 2:max_init_interations
+        temp2 = hypot(G(k).X-goal(1),G(k).Y-goal(2))+hypot(G(k).dx-goal_vel(1),G(k).dy-goal_vel(2));
+        if max_cost < temp2
+            id_temp = k;
+            temp = temp2;
+        end
+    end
+end
+final_path = [];
+while id_temp ~= 1
+    id_temp = G(id_temp).parent;
+    final_path = [final_path; G(id_temp).X G(id_temp).Y id_temp];
+end
+final_path = [flipud(final_path); goal 0]
+
+
+% Plot path taken
+plot(final_path(:,1),final_path(:,2),'b','Linewidth',2)
+scatter(final_path(:,1),final_path(:,2),'b')
+
 axis equal
-% %%
+%%
 % for k = 2:max_init_interations
 %     if G(k).state == 1
 %         plot([G(k).X G(G(k).parent).X],[G(k).Y G(G(k).parent).Y],'m')
