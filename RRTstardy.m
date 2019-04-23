@@ -6,7 +6,7 @@ tic
 
 start = [0 0];
 goal = [9 9];
-goal_vel = [0 -1.5];
+goal_vel = [1.5 0];
 
 accel_bound = .75;
 vel_bound = 3;
@@ -34,9 +34,12 @@ G(1).X = start(1);
 G(1).Y = start(2);
 G(1).dx = 1;
 G(1).dy = 0;
+G(1).ax = 0;
+G(1).ay = 0;
 G(1).cost = 0;
 G(1).px = 0;
 G(1).py = 0;
+G(1).t = 0;
 
 obstacles = [5 5 2;
             7 2 1;
@@ -115,7 +118,7 @@ for k = 2:max_init_interations
             G(k).vel = hypot(final_dx,final_dy);
             G(k).parent = parent_id;
             G(k).cost = G(parent_id).cost+dt*min_accel(3);
-            
+            G(k).t = G(parent_id).t+dt;
             
             
 %             Rewire
@@ -190,11 +193,17 @@ else
     end
 end
 final_path = [];
-while id_temp ~= 1
+final_data = [];
+while id_temp ~= 0
+    final_data = [G(id_temp).t G(id_temp).X G(id_temp).Y G(id_temp).dx G(id_temp).dy G(id_temp).ax G(id_temp).ay ; final_data];
+    final_path = [G(id_temp).X G(id_temp).Y id_temp; final_path];
     id_temp = G(id_temp).parent;
-    final_path = [final_path; G(id_temp).X G(id_temp).Y id_temp];
+    
 end
-final_path = [flipud(final_path); goal 0]
+
+
+
+
 
 
 % Plot path taken
@@ -202,6 +211,10 @@ plot(final_path(:,1),final_path(:,2),'b','Linewidth',2)
 scatter(final_path(:,1),final_path(:,2),'b')
 
 axis equal
+
+
+
+
 %%
 % for k = 2:max_init_interations
 %     if G(k).state == 1

@@ -15,6 +15,8 @@ classdef Node < handle
         px
         py
         
+        t
+        
         Index % id
         
         parent % id
